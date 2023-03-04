@@ -1,0 +1,7 @@
+itemadapter==0.3.0
+itemloaders==1.0.4
+PyMySQL==1.0.2
+pyopenssl==22.0.0
+cryptography==38.0.4
+Scrapy==2.6.1
+selenium==4.8.2
