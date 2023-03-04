@@ -93,8 +93,10 @@ DOWNLOADER_MIDDLEWARES = {
     'movielens1m.lib.ScrollSeleniumMiddleware': 800
 }
 SELENIUM_DRIVER_NAME = 'chrome'  #瀏覽器名稱
-SELENIUM_DRIVER_EXECUTABLE_PATH = '/Users/includeno/Environment/chromedriver_mac_arm64/chromedriver'  #驅動程式路徑
+SELENIUM_DRIVER_EXECUTABLE_PATH = '/tools/chromedriver'  #驅動程式路徑
+#linux
 SELENIUM_DRIVER_ARGUMENTS = [
+    '-headless',
     'user-agent="MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"',
     '--disable-gpu',
     '--no-sandbox',
@@ -103,4 +105,4 @@ SELENIUM_DRIVER_ARGUMENTS = [
     'blink-settings=imagesEnabled=false',
     '--disable-software-rasterizer',
     ]
-#'-headless',
+#
