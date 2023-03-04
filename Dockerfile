@@ -1,4 +1,4 @@
-FROM includeno/pythonchrome:3.9.chrome110.0.5481.30
+FROM includeno/pythonchrome:3.9.16.chrome111.0.5563.41
 
 EXPOSE 8080
 
