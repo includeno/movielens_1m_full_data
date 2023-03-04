@@ -13,4 +13,4 @@ ADD movielens1m /app
 # Install pip requirements
 RUN /bin/sh -c ' cd /app && python -m pip install -r /app/requirements.txt '
 
-CMD scrapy crawl imdb_detail -a SELENIUM_DRIVER_EXECUTABLE_PATH=/app
+CMD scrapy crawl imdb_detail -a SELENIUM_DRIVER_EXECUTABLE_PATH=/tools/chromedriver
