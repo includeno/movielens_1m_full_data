@@ -6,7 +6,7 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-from mysql_config import create_aws_connection
+from .mysql_config import create_aws_connection
 
 
 class Movielens1MPipeline:
