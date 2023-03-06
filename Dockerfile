@@ -1,4 +1,4 @@
-FROM includeno/pythonchrome:3.9.16.chrome111.0.5563.41
+FROM includeno/pythonfirefox:3.9.16.firefox102.8.0esr
 
 EXPOSE 8080
 
@@ -8,9 +8,9 @@ WORKDIR /app
 ENV VERSION="1.0-SNAPSHOT"
 ENV NAME="spider"
 
-ADD movielens1m /app
+ADD bs4_main /app
 
 # Install pip requirements
-RUN /bin/sh -c ' cd /app && python -m pip install -r /app/requirements.txt '
+RUN /bin/sh -c ' cd /app && python -m pip install -r requirements.txt '
 
-CMD scrapy crawl imdb_detail -a SELENIUM_DRIVER_EXECUTABLE_PATH=/tools/chromedriver
+CMD python detail.py

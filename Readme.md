@@ -4,6 +4,10 @@ Python
 
 scrapy+selenium+csv+mysql
 
+# Generate requirements.txt
+pip install pipreqs
+pipreqs .
+
 ## scrapy
 
 ### 初始化

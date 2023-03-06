@@ -2,6 +2,8 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from threading import Thread
+import concurrent.futures
 
 # url = 'https://www.imdb.com/title/tt0468569/'
 
@@ -15,8 +17,16 @@ def create_connection():
                             cursorclass=pymysql.cursors.DictCursor)
     return connection
 
+def create_aws_connection():
+    connection = pymysql.connect(host='dbs-mysql.cirpywua5kjp.ap-east-1.rds.amazonaws.com',
+                            user='admin',
+                            password='nacos4HBlv3==',
+                            database='spider',
+                            cursorclass=pymysql.cursors.DictCursor)
+    return connection
+
 def get_urls(count):
-    connection=create_connection()
+    connection=create_aws_connection()
     cursor=connection.cursor()
     if(count==None):
         count=10
@@ -141,7 +151,28 @@ def get_movie_detail(url,mysql_save=False):
             connection.commit()
         except:
             print("MYSQL error")
+    return {"name":title,"url":url,"time":time,"genre":'|'.join(list(set(genres))),"release_time":release_date,"directors":'|'.join(list(set(directors))),"writers":'|'.join(list(set(writers))),"actors":'|'.join(list(set(actors)))}
 
 urls=get_urls(5)
-for url in urls:
-    get_movie_detail(url,mysql_save=True)
+# for url in urls:
+#     get_movie_detail(url,mysql_save=False)
+
+# 创建一个线程列表
+threads = []
+
+# 创建一个线程池，指定最大线程数为 3
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    # 定义一组任务列表
+    args = [1, 2, 3, 4, 5]
+
+    # 提交任务到线程池，并获取对应的 Future 对象
+    futures = [executor.submit(get_movie_detail, args=(url,False,)) for url in urls]
+
+    # 遍历 Future 对象，获取执行结果
+    for future in concurrent.futures.as_completed(futures):
+        try:
+            result = future.result()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        else:
+            print(f"The result is {result}")

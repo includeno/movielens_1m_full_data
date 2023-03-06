@@ -15,10 +15,6 @@ jobs:
     name: 构建,发布
     runs-on: ubuntu-latest # use latest ubuntu to run the job
     # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
-    strategy:
-      matrix:
-        python_version: ["3.9"]
-        chrome_version: ["110.0.5481.30"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.9
