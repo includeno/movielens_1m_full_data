@@ -166,7 +166,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
     args = [1, 2, 3, 4, 5]
 
     # 提交任务到线程池，并获取对应的 Future 对象
-    futures = [executor.submit(get_movie_detail, args=(url,False,)) for url in urls]
+    futures = [executor.submit(get_movie_detail,(url,False,)) for url in urls]
 
     # 遍历 Future 对象，获取执行结果
     for future in concurrent.futures.as_completed(futures):
