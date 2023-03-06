@@ -52,9 +52,20 @@ def remove_pair(text):
     text2 = pattern.sub('', text)
     return text2
 
+def get_driver():
+    # 设置Firfox浏览器选项
+    options = webdriver.FirefoxOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--headless')
+
+    # 创建Firfox浏览器实例
+    driver = webdriver.Firefox(options=options)
+    return driver
+
 def get_movie_detail(url,mysql_save=False):
     # 启动Chrome浏览器
-    driver = webdriver.Chrome()
+    driver = get_driver()
     # 打开网页
     driver.get(url)
 
