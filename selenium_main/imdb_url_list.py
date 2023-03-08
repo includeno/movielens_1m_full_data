@@ -18,7 +18,7 @@ cursor=connection.cursor()
 
 # 创建Chrome浏览器实例
 options = webdriver.ChromeOptions()
-options.add_argument('--headless')
+#options.add_argument('--headless')
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
@@ -27,20 +27,18 @@ options.add_argument('blink-settings=imagesEnabled=false')
 options.add_argument('--disable-software-rasterizer')
 
 
-
-
 def get_keywords(count):
     if(count==None):
         count=10
     # 查询语句
-    sql = f"SELECT id, name, url FROM imdb_movies_links WHERE completed=0 LIMIT {count}"
+    sql = f"SELECT id, name,full_name, url FROM imdb_movies_links_full WHERE completed=0 LIMIT {count}"
 
     # 执行查询
     cursor.execute(sql)
     results = cursor.fetchall()
     result_list=[]
     for result in results:
-        result_list.append(result["name"])
+        result_list.append(result["full_name"])
     return result_list
 
 def search(driver,keyword):
@@ -64,7 +62,7 @@ def search(driver,keyword):
             movie_url = link.get_attribute("href")
             print("movie:",keyword, movie_url)
             # 更新语句
-            sql = "UPDATE imdb_movies_links SET url=%s, completed=1 WHERE name=%s"
+            sql = "UPDATE imdb_movies_links_full SET url=%s, completed=1 WHERE full_name=%s"
 
             # 执行更新
             data = [(movie_url, keyword)]
@@ -75,7 +73,7 @@ driver = webdriver.Chrome(options=options)
 # 打开IMDB网站
 driver.get("https://www.imdb.com/")
 
-for tune in range(50):
+for tune in range(150):
     for keyword in get_keywords(10):
         search(driver=driver,keyword=keyword)
 # 关闭浏览器

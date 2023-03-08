@@ -26,20 +26,17 @@ def create_aws_connection():
     return connection
 
 def get_urls(count):
-    connection=create_aws_connection()
+    connection=create_connection()
     cursor=connection.cursor()
     if(count==None):
         count=10
     # 查询语句
-    sql = f"SELECT id, name, url FROM imdb_movies_links WHERE spider_completed=0 and url like 'https://www.imdb.com/title%' LIMIT {count}"
+    sql = f"SELECT id, name,full_name, url FROM imdb_movies_links_full WHERE spider_completed=0 and url not in (select url from imdb_movies) LIMIT {count}"
 
     # 执行查询
     cursor.execute(sql)
     results = cursor.fetchall()
-    result_list=[]
-    for result in results:
-        result_list.append(result["url"])
-    return result_list
+    return results
 
 def remove_pair(text):
     # 要处理的文本内容
@@ -58,12 +55,18 @@ def get_driver():
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--headless')
-
+    options.add_argument('--disable-gpu')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-software-rasterizer')
     # 创建Firfox浏览器实例
     driver = webdriver.Firefox(options=options)
+    # 最小化窗口
+    #driver.minimize_window()
     return driver
 
-def get_movie_detail(url,mysql_save=False):
+def get_movie_detail(movie_item,mysql_save=False):
+    url=movie_item['url']
     # 启动Chrome浏览器
     driver = get_driver()
     # 打开网页
@@ -143,28 +146,10 @@ def get_movie_detail(url,mysql_save=False):
     print('电影时长:',time)
 
     if(mysql_save==True):
-        connection=create_connection()
-        cursor=connection.cursor()
-        try:
-            cursor.execute(""" INSERT INTO imdb_movies (name, url, time, genre, release_time, intro, directors, writers,starts, completed)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s); """, (
-                    title,
-                    url,
-                    time,'|'.join(list(set(genres))),release_date,intro,'|'.join(list(set(directors))),'|'.join(list(set(writers))),'|'.join(list(set(actors))),'1'
-                ))
-            connection.commit()
-            #更新links表
-            sql = "UPDATE imdb_movies_links SET spider_completed=1 WHERE url=%s"
+        pass
+    return {"name":title,"full_name":movie_item['full_name'],"url":url,"time":time,"genre":'|'.join(list(set(genres))),"release_time":release_date,"intro":intro,"directors":'|'.join(list(set(directors))),"writers":'|'.join(list(set(writers))),"actors":'|'.join(list(set(actors)))}
 
-            # 执行更新
-            data = [url]
-            cursor.executemany(sql, data)
-            connection.commit()
-        except:
-            print("MYSQL error")
-    return {"name":title,"url":url,"time":time,"genre":'|'.join(list(set(genres))),"release_time":release_date,"directors":'|'.join(list(set(directors))),"writers":'|'.join(list(set(writers))),"actors":'|'.join(list(set(actors)))}
-
-urls=get_urls(5)
+movie_list=get_urls(1100)
 # for url in urls:
 #     get_movie_detail(url,mysql_save=False)
 
@@ -172,12 +157,12 @@ urls=get_urls(5)
 threads = []
 
 # 创建一个线程池，指定最大线程数为 3
-with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
     # 定义一组任务列表
     args = [1, 2, 3, 4, 5]
 
     # 提交任务到线程池，并获取对应的 Future 对象
-    futures = [executor.submit(get_movie_detail,(url,False,)) for url in urls]
+    futures = [executor.submit(get_movie_detail,item,True) for item in movie_list]
 
     # 遍历 Future 对象，获取执行结果
     for future in concurrent.futures.as_completed(futures):
@@ -187,3 +172,21 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             print(f"An error occurred: {e}")
         else:
             print(f"The result is {result}")
+            connection=create_connection()
+            cursor=connection.cursor()
+            try:
+                cursor.execute(""" INSERT INTO imdb_movies (name,full_name, url, time, genre, release_time, intro, directors, writers,starts, completed)
+            VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s,%s, %s); """, (
+                        result['name'],result['full_name'],
+                        result['url'],
+                        result['time'],result['genre'],result['release_time'],result['intro'],result['directors'],result['writers'],result['actors'],'1'
+                    ))
+                #更新links表
+                sql = "UPDATE imdb_movies_links_full SET spider_completed=1 WHERE url=%s"
+                print("update links",sql)
+                # 执行更新
+                data = [result['url']]
+                cursor.executemany(sql, data)
+                connection.commit()
+            except:
+                print("MYSQL error")
